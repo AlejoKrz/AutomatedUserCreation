@@ -11,7 +11,7 @@ from ttkbootstrap.constants import *
 
 
 class CredentialManager:
-    def __init__(self, credentials_file="credentials.enc"):
+    def __init__(self, credentials_file="secure/credentials.enc"):
         self.credentials_file = credentials_file
         self.master_key = None
         self.fernet = None
