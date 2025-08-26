@@ -15,6 +15,11 @@ class CredentialManager:
         self.credentials_file = credentials_file
         self.master_key = None
         self.fernet = None
+
+        # Crear el directorio si no existe
+        credentials_dir = os.path.dirname(self.credentials_file)
+        os.makedirs(credentials_dir, exist_ok=True)
+
         self._load_or_create_master_key()
     
     def _load_or_create_master_key(self):
