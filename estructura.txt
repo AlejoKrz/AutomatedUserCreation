@@ -1,0 +1,47 @@
+/core/
+├── __init__.py             → Marca la carpeta como módulo Python
+├── models.py               → Define estructuras de datos
+├── sharepoint_client.py    → Cliente para interactuar con SharePoint
+├── user_processor.py       → Procesa usuarios y dispara bots
+└── workflow_manager.py     → Orquesta el flujo principal
+
+├── **/bots/**               (*Trabajadores especializados*)  
+│   ├── `ad_bot.py`          → *Crea usuarios en Active Directory*  
+│   ├── `office365_bot.py`   → *Configura correos en Office 365*  
+│   ├── `email_bot.py`       → *Envía emails de confirmación*  
+│   └── `bot_interface.py`   → *Contrato que todos los bots deben seguir*  
+
+├── **/config/**  
+│   ├── `settings.py`        → *Almacena URLs, credenciales, etc.*  
+│   └── `credentials.py`     → *Opcional: Maneja secretos (contraseñas)*  
+
+├── **/utils/**              (*Herramientas útiles*)  
+│   ├── `logger.py`          → *Lleva un diario de lo que pasa (log)*  
+│   └── `error_handler.py`   → *Atrapa errores y notifica*  
+
+├── `main.py`                → *Punto de inicio: "¡Empieza el proceso!"*  
+└── `requirements.txt`       → *Lista de librerías necesarias*  
+
+---
+
+### **Flujo en 3 Pasos**  
+1. **`workflow_manager.py`** pregunta a **`sharepoint_client.py`**: *"¿Hay usuarios aprobados?"*  
+2. **`user_processor.py`** reparte el trabajo a los **bots** (AD, Office 365, email).  
+3. Cada **bot** hace su tarea y reporta resultados.  
+
+### **¿Por qué funciona sin framework?**  
+- **SharePoint**: Usa `requests` (HTTP) para consultar datos.  
+- **Bots**: Librerías específicas como `pyad` (AD) o `O365` (Microsoft 365).  
+- **Programación**: Un simple `while True` en `main.py` verifica cada X minutos.  
+
+### **Ejemplo Visual**  
+```python
+# main.py (simplificado)
+from core.workflow_manager import WorkflowManager
+
+def main():
+    jefe = WorkflowManager()  # Crea el jefe de flujo
+    jefe.run()  # Pregunta eternamente: "¿Algo nuevo?"
+
+if __name__ == "__main__":
+    main()

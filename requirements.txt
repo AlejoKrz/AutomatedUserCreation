@@ -1,0 +1,23 @@
+# Dependencias principales
+selenium>=4.15.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Para SharePoint y Microsoft Graph
+msal>=1.24.0
+Office365-REST-Python-Client>=2.4.0
+
+# Para interfaz gráfica
+tkinter  # Incluido en Python estándar
+
+# Para logging y utilidades
+python-dateutil>=2.8.2
+
+# Para cifrado de credenciales
+cryptography>=41.0.0
+
+# Para desarrollo y testing (opcional)
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
+
