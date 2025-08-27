@@ -3,6 +3,7 @@
 *.env
 config/credentials.py
 secure/
+master.key
 # Logs
 logs/
 *.log
