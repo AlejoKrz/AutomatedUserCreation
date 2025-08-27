@@ -4,6 +4,7 @@ import random
 import string
 import os
 from datetime import datetime
+from core.utils import guardar_credencial  # Importar la función para guardar credenciales
 
 
 def generar_contraseña(longitud=10):
@@ -128,6 +129,10 @@ class ADBot:
                 self.logger.info(msg)
                 if self.widget:
                     self.widget.log(msg)
+
+                # Guardar credenciales generadas
+                guardar_credencial("Windows", user.Login, contraseña)
+
                 return {"status": "success", "stdout": stdout, "stderr": stderr, "contraseña": contraseña}
             else:
                 msg = f"Error creando usuario AD. Verifica detalles:\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}"

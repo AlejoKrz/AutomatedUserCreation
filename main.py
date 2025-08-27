@@ -7,6 +7,7 @@ Usa configuración de logging desde config/settings.py
 import sys
 import logging
 import logging.config
+from datetime import datetime
 from core.config import settings
 from core.workflow_manager import WorkflowManager
 from core.user_processor import UserProcessor
@@ -17,6 +18,7 @@ from core.bots.bot_cobis import CobisApp
 from core.bots.bot_syscard import SyscardsApp
 from core.bots.bot_extreme import ExtremeWebApp
 from core.credential_manager import CredentialManager
+from core.utils import leer_credenciales, generar_cuerpo_html, enviar_correo_graph, CRED_FILE
 
 def setup_logging():
     """Configura el sistema de logging basado en settings.py"""
@@ -56,7 +58,7 @@ def main():
     # Configurar logging
     setup_logging()
     logger = logging.getLogger(__name__)
-    logger.info("Iniciando sistema de automatizacion")
+    logger.info("Iniciando sistema de automatización")
 
     try:
         widget = ProgressWidget(None)  # Primero crea el widget
@@ -96,6 +98,21 @@ def main():
         workflow_manager = WorkflowManager(processor, widget)
         widget.workflow_manager = workflow_manager  # Asigna el workflow al widget
         widget.mainloop()
+
+        # Al cierre del widget / fin del workflow recopilamos el archivo de credenciales
+        try:
+            credenciales = leer_credenciales()  # función en core.utils.py
+            if credenciales:
+                cuerpo_html = generar_cuerpo_html(credenciales)
+                destinatario = "squiroz@cpn.fin.ec"
+                asunto = f"Credenciales generadas - {datetime.now():%Y-%m-%d %H:%M}"
+                # enviar_correo_graph eliminará el archivo si el envío es exitoso
+                enviar_correo_graph(destinatario, asunto, cuerpo_html, archivo_a_eliminar=CRED_FILE)
+                logger.info("Correo de credenciales enviado correctamente y archivo eliminado.")
+            else:
+                logger.info("No se encontraron credenciales generadas. No se envió correo.")
+        except Exception as e:
+            logger.error(f"Error enviando correo de credenciales: {e}", exc_info=True)
 
     except Exception as e:
         logger.critical(f"Error fatal: {str(e)}", exc_info=True)

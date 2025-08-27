@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from core.credential_manager import CredentialManager
+from core.utils import guardar_credencial  
 
 class WidgetLogHandler(logging.Handler):
     def __init__(self, widget):
@@ -371,6 +372,8 @@ class ExtremeWebApp:
             # 11. Guardar cambios
             self.click_guardar_y_esperar()
 
+            guardar_credencial("Extreme", user.Login, "WINDOWS")
+
             return {"status": "success", "message": f"Usuario {user.Login} habilitado en Extreme Web"}
 
         except Exception as e:
@@ -382,6 +385,7 @@ class ExtremeWebApp:
             except Exception as capture_error:
                 self.logger.error(f"No se pudo capturar pantalla: {str(capture_error)}")
             
+
             return {"status": "error", "message": str(e)}
         
         finally:

@@ -7,6 +7,7 @@ from pywinauto.findwindows import ElementNotFoundError
 import random
 import string
 from core.credential_manager import CredentialManager
+from core.utils import guardar_credencial  # Importar la función para guardar credenciales
 
 def generar_contraseña(longitud=10):
     if longitud < 10:
@@ -268,6 +269,9 @@ class SyscardsApp:
                 self.main_window.child_window(title="Grabar", control_type="Button"),
                 "Botón Grabar"
             )
+
+            # Guardar credenciales generadas
+            guardar_credencial("Syscard", user.Login, user.Password)
 
             # Espera final con verificación
             self.logger.info("Esperando confirmación...")

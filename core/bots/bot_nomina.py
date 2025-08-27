@@ -6,6 +6,8 @@ from pywinauto import Application, mouse
 from pywinauto.timings import Timings
 from pywinauto.findwindows import ElementNotFoundError
 from core.credential_manager import CredentialManager
+from core.utils import guardar_credencial  
+
 
 class WidgetLogHandler(logging.Handler):
     def __init__(self, widget):
@@ -326,6 +328,9 @@ class NominaApp:
             self.logger.info("Proceso de nómina completado correctamente")
             if self.app:
                 self.app.kill()
+
+            guardar_credencial("Nomina", user.Login, "INGRESADO")
+            
             return {"status": "success"}
         except Exception as e:
             self.logger.critical(f"Error crítico en ejecución: {str(e)}", exc_info=True)
