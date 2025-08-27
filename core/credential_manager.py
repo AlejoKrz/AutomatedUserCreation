@@ -23,7 +23,7 @@ class CredentialManager:
         self._load_or_create_master_key()
     
     def _load_or_create_master_key(self):
-        key_file = "master.key"
+        key_file = "secure/master.key"
         
         if os.path.exists(key_file):
             with open(key_file, "rb") as f:
