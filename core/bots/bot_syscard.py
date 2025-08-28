@@ -10,8 +10,8 @@ from core.credential_manager import CredentialManager
 from core.utils import guardar_credencial  # Importar la función para guardar credenciales
 
 def generar_contraseña(longitud=10):
-    if longitud < 10:
-        raise ValueError("La contraseña debe tener al menos 10 caracteres.")
+    if longitud != 10:
+        raise ValueError("La contraseña debe tener exactamente 10 caracteres.")
     
     # Caracteres obligatorios
     mayuscula = random.choice(string.ascii_uppercase)
@@ -19,19 +19,21 @@ def generar_contraseña(longitud=10):
     numero = random.choice(string.digits)
     simbolo = random.choice("!@#$%^&*()-_=+[]{};:,.<>/?")
 
-    # Rellenar el resto de la contraseña
+    # Rellenar el resto hasta llegar a 10 caracteres
     resto = [
         random.choice(
             string.ascii_letters + string.digits + "!@#$%^&*()-_=+[]{};:,.<>/?"
         )
-        for _ in range(longitud - 4)  # Ya tenemos 4 obligatorios
+        for _ in range(longitud - 4)
     ]
 
-    # Construir y mezclar
-    contraseña_lista = [mayuscula, minuscula, numero, simbolo] + resto
-    random.shuffle(contraseña_lista)
+    # Combinar todos los caracteres
+    contraseña = [mayuscula, minuscula, numero, simbolo] + resto
+    
+    # Mezclar para que no queden siempre al inicio
+    random.shuffle(contraseña)
 
-    return ''.join(contraseña_lista)
+    return "".join(contraseña)
 
 
 class WidgetLogHandler(logging.Handler):
