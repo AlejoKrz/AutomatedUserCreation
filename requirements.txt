@@ -3,20 +3,29 @@ selenium>=4.15.0
 requests>=2.31.0
 python-dotenv>=1.0.0
 
-# Para SharePoint y Microsoft Graph
+# Microsoft Graph / Auth / SharePoint / Office365
 msal>=1.24.0
+requests>=2.31.0
 Office365-REST-Python-Client>=2.4.0
 
-# Para interfaz gráfica
-tkinter  # Incluido en Python estándar
+# GUI / widgets
+ttkbootstrap>=1.6.1
+tkinter  # incluido en la distribución estándar de Python (no se instala por pip)
 
-# Para logging y utilidades
+# Automatización de GUI Windows
+pywinauto>=0.6.8
+comtypes>=1.1.14
+pywin32>=305
+Pillow>=10.0.0
+
+# Cifrado / seguridad (si se usa)
+cryptography>=41.0.0
+keyring>=23.13.1  # opcional: para almacenar llaves en el almacén del OS
+
+# Utilidades
 python-dateutil>=2.8.2
 
-# Para cifrado de credenciales
-cryptography>=41.0.0
-
-# Para desarrollo y testing (opcional)
+# Desarrollo / testing / lint
 pytest>=7.4.0
 black>=23.0.0
 flake8>=6.0.0
