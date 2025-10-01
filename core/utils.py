@@ -93,7 +93,7 @@ def _obtener_token_graph():
         raise RuntimeError(f"Error al obtener token Graph: {token}")
     return token["access_token"]
 
-def enviar_correo_graph(destinatario, asunto, cuerpo_html, remitente=None, archivo_a_eliminar=None):
+def enviar_correo_graph(destinatario, asunto, cuerpo_html, archivo_a_eliminar=None):
     """
     Envía un correo HTML usando Microsoft Graph (application permission).
     Si 'archivo_a_eliminar' se suministra y el envío tiene éxito, elimina ese archivo.
@@ -109,7 +109,7 @@ def enviar_correo_graph(destinatario, asunto, cuerpo_html, remitente=None, archi
         "toRecipients": [{"emailAddress": {"address": destinatario}}],
     }
     payload = {"message": message, "saveToSentItems": "true"}
-    endpoint = "https://graph.microsoft.com/v1.0/me/sendMail" if remitente is None else f"https://graph.microsoft.com/v1.0/users/{remitente}/sendMail"
+    endpoint = "https://graph.microsoft.com/v1.0/users/a4022c89-ca57-4cca-9ada-0d475e63b9d5/sendMail"
     resp = requests.post(endpoint, headers=headers, json=payload)
     if resp.status_code not in (200, 202):
         raise RuntimeError(f"Error al enviar correo Graph {resp.status_code}: {resp.text}")

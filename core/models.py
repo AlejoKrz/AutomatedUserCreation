@@ -22,6 +22,7 @@ class SharePointUser:
     Oficina_x003a__x0020_Ciudad_x0020  : str  # Ciudad de la oficina STR
     Oficina_x003a__x0020_Regi_x00f3_ : str  # Región de la oficina en STR
     Oficina_x003a__x0020_Provincia: str  # Provincia de la oficina
+    Oficina_x003a_Login_x0020_Nodos_: str  # Nodos de Cobis
     
     Cargo: str  # Cargo del usuario
     Cargo_x003a__x0020_Correo: str  # Correo asociado al cargo

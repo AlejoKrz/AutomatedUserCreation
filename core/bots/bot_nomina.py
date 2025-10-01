@@ -1,13 +1,19 @@
 import logging
 import os
 import time
+import pyautogui
+import time
 from datetime import datetime
 from pywinauto import Application, mouse
 from pywinauto.timings import Timings
 from pywinauto.findwindows import ElementNotFoundError
 from core.credential_manager import CredentialManager
 from core.utils import guardar_credencial  
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # .../core/bots
+IMG_DIR = os.path.join(BASE_DIR, "..", "config", "bot_utils")  # .../core/config/bot_utils
+imgs = [
+    os.path.join(IMG_DIR, "datos_secundarios_nomina.png")
+]
 
 class WidgetLogHandler(logging.Handler):
     def __init__(self, widget):
@@ -59,6 +65,23 @@ class NominaApp:
 
         Timings.window_find_timeout = 5
         Timings.after_clickinput_wait = 0.1
+
+    @staticmethod
+    def click_por_imagen_etiqueta(nombres_png, timeout=5, confidences=(0.9, 0.85, 0.8, 0.75, 0.7), region=None, grayscale=True):
+        fin = time.time() + timeout
+        while time.time() < fin:
+            for png in nombres_png:
+                for conf in confidences:
+                    try:
+                        loc = pyautogui.locateCenterOnScreen(png, confidence=conf, region=region, grayscale=grayscale)
+                        if loc:
+                            pyautogui.click(loc.x, loc.y)
+                            return True
+                    except Exception:
+                        pass
+            time.sleep(0.2)
+        return False
+
 
 
     def wait_for_element(self, element, timeout=2, retry_interval=0.5, description=""):
@@ -156,23 +179,32 @@ class NominaApp:
     def navigate_to_personal_data(self):
         try:
             self.logger.info("Navegando a Datos Personales...")
-            nomina_menu = self.wait_for_element(
-                self.main_window.child_window(
-                    title="Aplicación", 
-                    control_type="MenuBar"
-                ).child_window(title="Nómina", control_type="MenuItem"),
-                description="Menú Nómina"
-            )
-            self.click_element(nomina_menu, "Menú Nómina")
+            # 1) Construir y esperar el spec de "Nómina"
+            nomina_menu_spec = self.main_window.child_window(
+                title="Aplicación", control_type="MenuBar"
+            ).child_window(title="Nómina", control_type="MenuItem")
+            nomina_menu_spec = self.wait_for_element(
+                nomina_menu_spec, description="Menú Nómina"
+            )  # espera sobre WindowSpecification [web:47]
+
+            # 2) Solo para "Nómina": convertir a wrapper y clic con delta; NO llamar click_element con wrapper
+            nomina_menu = nomina_menu_spec.wrapper_object()  # convertir después del wait [web:55]
+            ptn = nomina_menu.rectangle().mid_point()
+            from pywinauto import mouse
+            mouse.click(coords=(ptn.x + 20, ptn.y))  # compensación a la derecha [web:6]
+
+            # 3) Mantener la lógica original para "Datos Personales" (sin cambios)
             datos_personales = self.wait_for_element(
-                nomina_menu.child_window(title="Datos Personales", auto_id="58", control_type="MenuItem"),
+                nomina_menu_spec.child_window(title="Datos Personales", auto_id="58", control_type="MenuItem"),
                 description="Opción Datos Personales"
-            )
-            self.click_element(datos_personales, "Datos Personales")
+            )  # aquí sí se pasa un spec, no wrapper [web:47]
+            self.click_element(datos_personales, "Datos Personales")  # tu helper opera sobre el spec [web:47]
+
             self.logger.info("Navegacion a Datos Personales completada")
         except Exception as e:
             self.logger.error(f"Error al navegar a Datos Personales: {str(e)}")
             raise
+
 
     def execute(self, user=None):
         self.logger.info("Entrando a execute de NominaApp")
@@ -283,10 +315,18 @@ class NominaApp:
                 self.logger.error(f"Error al seleccionar sexo: {str(e)}")
 
             # Click en coordenadas
-            
-            mouse.click(coords=(645, 270))
-            self.logger.info("Click en coordenadas (645, 270) realizado")
+            rect = self.main_window.rectangle()
+            region = (rect.left, rect.top, rect.width(), rect.height())
 
+            ok = self.click_por_imagen_etiqueta(
+                imgs,        # usa la lista definida arriba con rutas completas
+                timeout=6,
+                region=region
+            )
+            if not ok:
+                self.logger.warning("No se encontró la etiqueta por imagen, reintentando con OCR...")
+
+            
             fields = [
                 ("25", str(int(float(user.Oficina_x003a__x0020_Ciudad_x002))), "Ciudad"),
                 ("26", "1", "Moneda"),

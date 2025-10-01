@@ -3,6 +3,8 @@ import os
 import time
 from datetime import datetime
 from pywinauto import Application
+from pywinauto.keyboard import send_keys
+
 from pywinauto.findwindows import ElementNotFoundError
 from core.credential_manager import CredentialManager
 
@@ -177,6 +179,43 @@ class CobisApp:
             self.logger.error(f"Error al llenar formulario de funcionario: {str(e)}")
             raise
 
+
+    def asignRol(self, ventana_funcionarios, user):
+        try:
+            rol_button= ventana_funcionarios.child_window(title="Roles", control_type="Button")
+            rol_button.click_input()
+            time.sleep(1)
+            self.logger.info("Botón Roles presionado")
+            rol_window= self.main_window.window(title="Roles por Usuario")
+            rol_field = rol_window.child_window(auto_id="_txtCampo_1", control_type="Edit")
+            rol_field.set_text(str(int(float(user.Cargo_x003a__x0020_Rol_x0020_en_))))
+            rol_horario = rol_window.child_window(auto_id="_txtCampo_2", control_type="Edit")
+            rol_horario.set_text("1")
+            rol_transmitir = rol_window.child_window(title="Transmitir", control_type="Button")
+            rol_transmitir.click_input()
+        except Exception as e:
+            self.logger.error(f"Error al asignar rol: {str(e)}")
+            raise
+    
+    def asignLogin(self, ventana_funcionarios, user):
+        try:
+            login_button= ventana_funcionarios.child_window(title="Login", control_type="Button")
+            login_button.click_input()
+            self.logger.info("Botón Login presionado")
+            login_window= self.main_window.window(title="Login en Nodos")
+            filial_field = login_window.child_window(auto_id="_txtCampo_1", control_type="Edit")
+            filial_field.set_text("1")
+            oficina_field = login_window.child_window(auto_id="_txtCampo_2", control_type="Edit")
+            oficina_field.set_text(str(int(float(user.Oficina_x003a__x0020_N_x00fa_mer))))
+            nodo_field = login_window.child_window(auto_id="_txtCampo_3", control_type="Edit")
+            nodo_field.set_text(str(int(float(user.Oficina_x003a_Login_x0020_Nodos_))))
+            login_transmitir = login_window.child_window(title="Transmitir", control_type="Button")
+            login_transmitir.click_input()
+        except Exception as e:
+            self.logger.error(f"Error al asignar login: {str(e)}")
+            raise
+
+
     def execute(self, user):
         """Método principal que ejecuta todo el flujo"""
         try:
@@ -216,15 +255,18 @@ class CobisApp:
                 transmitir_btn.click_input()
                 time.sleep(2)  # Espera breve después del clic
                 self.logger.info("Botón Transmitir presionado exitosamente")
-                return {"status": "success", "message": "Proceso completado correctamente"}
-                
             except Exception as e:
                 error_msg = f"Error al presionar Transmitir: {str(e)}"
                 self.logger.error(error_msg)
                 return {"status": "error", "message": error_msg}
             
             time.sleep(2)  # Espera para que se procese la transmisión
-            self.logger.info("Proceso completado exitosamente")
+            self.logger.info("Usuario creado exitosamente")
+            self.logger.info(f"Se procede a asignar rol: {user.Cargo_x003a__x0020_Rol_x0020_en_}")
+            self.asignRol(ventana_func, user)      
+            self.asignLogin(ventana_func, user)
+            self.logger.info(f"Se asignó login en nodo: {user.Oficina_x003a_Login_x0020_Nodos_}")      
+            self.logger.info("Formulario de funcionario cerrado")
             return {"status": "success", "message": "Proceso completado correctamente"}
             
         except Exception as e:

@@ -16,22 +16,16 @@ def generar_contraseña(longitud=10):
     # Caracteres obligatorios
     mayuscula = random.choice(string.ascii_uppercase)
     minuscula = random.choice(string.ascii_lowercase)
-    numero = random.choice(string.digits)
-    simbolo = random.choice("!@#$%^&*()-_=+[]{};:,.<>/?")
+    numeros_final = [random.choice(string.digits) for _ in range(2)]
 
-    # Rellenar el resto hasta llegar a 10 caracteres
+    # Rellenar el resto con letras (mayúsculas o minúsculas)
     resto = [
-        random.choice(
-            string.ascii_letters + string.digits + "!@#$%^&*()-_=+[]{};:,.<>/?"
-        )
+        random.choice(string.ascii_letters)
         for _ in range(longitud - 4)
     ]
 
-    # Combinar todos los caracteres
-    contraseña = [mayuscula, minuscula, numero, simbolo] + resto
-    
-    # Mezclar para que no queden siempre al inicio
-    random.shuffle(contraseña)
+    # Combinar: mayúscula, minúscula, resto de letras, 2 números al final
+    contraseña = [mayuscula, minuscula] + resto + numeros_final
 
     return "".join(contraseña)
 

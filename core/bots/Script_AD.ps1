@@ -16,7 +16,6 @@
     [string]$proxyAddresses
 )
 
-# Configurar logging detallado
 $LogPath = "C:\Logs\ADUserCreation"
 if (-not (Test-Path -Path $LogPath)) {
     New-Item -ItemType Directory -Path $LogPath -Force
@@ -33,13 +32,9 @@ function Write-Log {
 
 try {
     Write-Log "Iniciando creación de usuario $Nombre_Apellido ($Login)"
-    
-    # Validación básica de parámetros
     if ([string]::IsNullOrEmpty($Login) -or [string]::IsNullOrEmpty($Contraseña)) {
         throw "Login o contraseña no pueden estar vacíos"
     }
-
-    # Mostrar parámetros recibidos (sin contraseña)
     Write-Log "Parámetros recibidos:"
     Write-Log "  Nombre_Apellido: $Nombre_Apellido"
     Write-Log "  Nombres: $Nombres"
@@ -51,44 +46,42 @@ try {
     Write-Log "  Oficina: $Oficina"
     Write-Log "  Email: $EmailAddress"
 
-    # Crear usuario
     Write-Log "Creando usuario en AD..."
 
-$proxyAddressesArray = @()
-if (![string]::IsNullOrEmpty($proxyAddresses)) {
-    $proxyAddressesArray = @($proxyAddresses)
-}
-
-$userParams = @{
-    Name              = $Nombre_Apellido
-    GivenName         = $Nombres
-    Surname           = $Apellidos
-    SamAccountName    = $Login
-    UserPrincipalName = $Login_dominio
-    AccountPassword   = (ConvertTo-SecureString $Contraseña -AsPlainText -Force)
-    Enabled           = $true
-    Path              = $OU
-    DisplayName       = $Nombre_Apellido
-    Description       = $Cargo
-    Company           = "CPN"
-    Department        = $Departamento
-    Title             = $Cargo
-    StreetAddress     = "."
-    City              = $Ciudad
-    State             = $Provincia
-    Country           = "EC"
-    Office            = $Oficina
-    EmailAddress      = $EmailAddress
-    OtherAttributes   = @{
-        wWWHomePage    = $Login
+    $proxyAddressesArray = @()
+    if (![string]::IsNullOrEmpty($proxyAddresses)) {
+        $proxyAddressesArray = @($proxyAddresses)
     }
-    ErrorAction       = 'Stop'
-}
 
-# Agregar ProxyAddresses a OtherAttributes si hay direcciones
-if ($proxyAddressesArray.Count -gt 0) {
-    $userParams.OtherAttributes.Add("ProxyAddresses", $proxyAddressesArray)
-}
+    $userParams = @{
+        Name               = $Nombre_Apellido
+        GivenName          = $Nombres
+        Surname            = $Apellidos
+        SamAccountName     = $Login
+        UserPrincipalName  = $Login_dominio
+        AccountPassword    = (ConvertTo-SecureString $Contraseña -AsPlainText -Force)
+        Enabled            = $true
+        Path               = $OU
+        DisplayName        = $Nombre_Apellido
+        Description        = $Cargo
+        Company            = "CPN"
+        Department         = $Departamento
+        Title              = $Cargo
+        StreetAddress      = "."
+        City               = $Ciudad
+        State              = $Provincia
+        Country            = "EC"
+        Office             = $Oficina
+        EmailAddress       = $EmailAddress
+        OtherAttributes    = @{
+            wWWHomePage    = $Login
+        }
+        ErrorAction        = 'Stop'
+    }
+
+    if ($proxyAddressesArray.Count -gt 0) {
+        $userParams.OtherAttributes.Add("ProxyAddresses", $proxyAddressesArray)
+    }
     Write-Log "Parámetros para New-ADUser:"
     $userParams.GetEnumerator() | ForEach-Object {
         Write-Log "  $_.Key = $($_.Value)"
@@ -98,12 +91,10 @@ if ($proxyAddressesArray.Count -gt 0) {
 
     Write-Log "Usuario $Nombre_Apellido creado correctamente (SAM: $Login)"
 
-    # Configurar cambio de contraseña en primer login
     Write-Log "Configurando cambio de contraseña en primer login..."
     Set-ADUser -Identity $Login -ChangePasswordAtLogon $true -ErrorAction Stop
     Write-Log "Configuración completada para usuario $Login"
 
-    # Verificar creación
     $createdUser = Get-ADUser -Identity $Login -Properties * -ErrorAction Stop
     Write-Log "Usuario verificado:"
     Write-Log "  Nombre: $($createdUser.Name)"
@@ -114,30 +105,34 @@ if ($proxyAddressesArray.Count -gt 0) {
     Write-Log "Proceso completado exitosamente"
     exit 0
 
-} catch [Microsoft.ActiveDirectory.Management.ADIdentityAlreadyExistsException] {
-    Write-Log "ERROR: El usuario $Login ya existe en Active Directory" -level "ERROR"
-    Write-Log "Detalles del error: $($_.Exception.Message)" -level "ERROR"
-    Write-Log "Stack Trace: $($_.Exception.StackTrace)" -level "DEBUG"
-    exit 1
-} catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-    Write-Log "ERROR: Problema con la OU o dominio" -level "ERROR"
-    Write-Log "Mensaje: $($_.Exception.Message)" -level "ERROR"
-    Write-Log "OU especificada: $OU" -level "DEBUG"
-    exit 2
-} catch [System.Security.Cryptography.CryptographicException] {
-    Write-Log "ERROR: Problema con la contraseña" -level "ERROR"
-    Write-Log "Mensaje: $($_.Exception.Message)" -level "ERROR"
-    exit 3
 } catch {
-    Write-Log "ERROR: Error inesperado" -level "ERROR"
-    Write-Log "Tipo de excepción: $($_.Exception.GetType().FullName)" -level "ERROR"
-    Write-Log "Mensaje: $($_.Exception.Message)" -level "ERROR"
-    Write-Log "Stack Trace: $($_.Exception.StackTrace)" -level "DEBUG"
+    $exception = $_.Exception
+    $exceptionType = $exception.GetType().FullName
+    Write-Log "ERROR: Se produjo un error de tipo $exceptionType" -level "ERROR"
+    Write-Log "Mensaje: $($exception.Message)" -level "ERROR"
     
-    # Información adicional del error
-    if ($_.Exception.InnerException) {
-        Write-Log "Inner Exception: $($_.Exception.InnerException.Message)" -level "DEBUG"
+    if ($exception.InnerException) {
+        Write-Log "Inner Exception: $($exception.InnerException.Message)" -level "ERROR"
     }
     
-    exit 99
+    Write-Log "Stack Trace:" -level "DEBUG"
+    Write-Log $exception.StackTrace -level "DEBUG"
+
+    Write-Log "Detalles del Error Completo:" -level "DEBUG"
+    Write-Log ($Error[0] | Format-List * -Force | Out-String) -level "DEBUG"
+
+    switch ($exceptionType) {
+        "Microsoft.ActiveDirectory.Management.ADIdentityAlreadyExistsException" {
+            exit 1
+        }
+        "Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException" {
+            exit 2
+        }
+        "System.Security.Cryptography.CryptographicException" {
+            exit 3
+        }
+        default {
+            exit 99
+        }
+    }
 }

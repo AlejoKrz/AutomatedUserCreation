@@ -86,7 +86,7 @@ class ADBot:
         script_path = os.path.abspath("core/bots/Script_AD.ps1")
         ou = user.Departamento_x003a__x0020_Unidad if user.Departamento_x003a__x0020_Unidad else user.Oficina_x003a__x0020_OU_x0020_Ac
         args = [
-            "powershell",
+            r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
             "-ExecutionPolicy", "Bypass",
             "-File", script_path,
             "-Nombre_Apellido", Nombre_Apellido,

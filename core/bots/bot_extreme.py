@@ -22,11 +22,11 @@ class WidgetLogHandler(logging.Handler):
             self.widget.log(log_entry)
 
 class ExtremeWebApp:
-    def __init__(self, widget=None, log_dir='logs/extreme_web', credentials=None):
+    def __init__(self, widget=None, log_dir='logs/extreme_web', credentials=None, url=None):
         self.app = None
         self.main_window = None
         self.widget = widget
-
+        self.url = url
         # Cargar credenciales desde el CredentialManager si no se proporcionan
         if credentials is None:
             credential_manager = CredentialManager()

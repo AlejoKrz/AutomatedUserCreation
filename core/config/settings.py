@@ -25,6 +25,9 @@ BOTS = {
     "Syscard": {
         "app_path": r"C:\Syscards_PRODUCCION\Win\clientasm\winLaunch.exe"
     },
+    "ExtremeWeb": {
+        "url": "http://172.20.0.50/ExtremeWebTs/#/Login"  # Reemplaza con la URL real
+    }
 }
 
 # ===== Logging =====

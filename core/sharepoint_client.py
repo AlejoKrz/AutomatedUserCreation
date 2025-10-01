@@ -52,7 +52,7 @@ class SharePointClient:
             "Correoelectr_x00f3_nico",
             "Departamento",
             "Departamento_x003a__x0020_Unidad",
-
+            "Oficina_x003a_Login_x0020_Nodos_",
             "Oficina_x003a__x0020_Region",
             "Oficina_x003a__x0020_Ciudad_x0020",
             "Oficina_x003a__x0020_Regi_x00f3_",

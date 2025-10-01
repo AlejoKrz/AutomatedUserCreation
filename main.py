@@ -88,6 +88,7 @@ def main():
                 credentials=credential_manager.load_credentials("bot_syscard")
             ),
             "bot_extreme": ExtremeWebApp(
+                url=settings.BOTS["ExtremeWeb"]["url"],
                 widget=widget,
                 log_dir="logs/extreme_web",
                 credentials=credential_manager.load_credentials("bot_extreme")
